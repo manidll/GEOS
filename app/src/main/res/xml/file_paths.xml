@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Carpeta privada de tu app: /storage/emulated/0/Android/data/tu.app/files/Pictures -->
+    <external-files-path
+        name="images"
+        path="Pictures/" />
+</paths>
