@@ -7,6 +7,7 @@ import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -53,8 +54,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
     /**
      * Función principal que se ejecuta al iniciar la Activity.
      * Configura permisos, base de datos, cámara, cliente de ubicación
@@ -100,8 +99,8 @@ class MainActivity : AppCompatActivity() {
         binding.btnAgregar.setOnClickListener { agregarUsuario() }
         binding.btnEscribir.setOnClickListener {
             if (listaRegistros.isNotEmpty()) exportarExcel(listaRegistros)
-            else Toast.makeText(this, "No hay registros para exportar", Toast.LENGTH_SHORT).show()
-        }
+            else Toast.makeText(this, "No hay registros para exportar", Toast.LENGTH_SHORT).show() }
+        binding.btnRegresar.setOnClickListener { finish()}
     }
 
     /**
@@ -120,6 +119,28 @@ class MainActivity : AppCompatActivity() {
             Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
         )
         takePictureLauncher.launch(currentPhotoUri)
+    }
+
+/**
+ * Valida que los campos de texto proporcionados no estén vacíos.
+ *
+ * Recorre cada [EditText] recibido como argumento y verifica si su contenido
+ * es nulo o está vacío (después de aplicar trim). Si un campo está vacío,
+ * se le asigna un mensaje de error "Campo Obligatorio" y la función marcará
+ * la validación como fallida.
+ *
+ * @param campos Lista variable de campos [EditText] a validar.
+ * @return `true` si todos los campos contienen texto, `false` si al menos uno está vacío.
+ */
+    private fun validarCampos(vararg campos: EditText): Boolean {
+        var valido = true
+        for (campo in campos){
+            if (campo.text.toString().trim().isEmpty()){
+                campo.error = "Campo Obligatorio"
+                valido = false
+            }
+        }
+        return valido
     }
 
     /**
@@ -145,21 +166,29 @@ class MainActivity : AppCompatActivity() {
         val modeloDmedidor = binding.etModeloMedidor.text.toString().trim()
         val regimenFis = binding.etRegimenFiscal.text.toString().trim()
 
-        if (nombre.isEmpty() || inmueble.isEmpty()) {
-            Toast.makeText(this, "Completa al menos los campos obligatorios", Toast.LENGTH_SHORT).show()
+        // 🔹 Validar campos obligatorios
+        val validos = validarCampos(binding.etInmueble, binding.etNombreUsuario, binding.etLocalizacion,
+                                                binding.etGiroD, binding.etServicioD, binding.etSituacionD, binding.etCodigoPostal, binding.etSeccion,
+                                                    binding.etRutaD, binding.etDerivada, binding.etUbicacionToma, binding.etNumSerieMedidor, binding.etNumMedidor,
+                                                        binding.etModeloMedidor, binding.etRegimenFiscal)
+        if (!validos) {
+            Toast.makeText(this, "Completa los campos obligatorios", Toast.LENGTH_SHORT).show()
             return
         }
 
+        // 🔹 Validar foto
         if (!::currentPhotoUri.isInitialized || currentPhotoUri == Uri.EMPTY) {
             Toast.makeText(this, "Debes tomar una foto antes de agregar", Toast.LENGTH_SHORT).show()
             return
         }
 
+        // 🔹 Validar ubicación
         if (currentLat == null || currentLng == null) {
             Toast.makeText(this, "No se pudo obtener ubicación", Toast.LENGTH_SHORT).show()
             return
         }
 
+        // 🔹 Crear y guardar usuario
         val usuario = Usuario(
             inmueble = inmueble,
             nombreUsuario = nombre,
@@ -190,6 +219,7 @@ class MainActivity : AppCompatActivity() {
         limpiarCampos()
         Toast.makeText(this, "Usuario agregado correctamente", Toast.LENGTH_SHORT).show()
     }
+
 
 
     /**
