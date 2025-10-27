@@ -25,10 +25,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GEOS">
 
-        <!-- SplashActivity como launcher -->
+        <!-- SplashActivity: pantalla inicial (launcher) -->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
+            android:noHistory="true"
             android:label="@string/title_activity_splash"
             android:theme="@style/Theme.GEOS">
             <intent-filter>
@@ -37,12 +38,17 @@
             </intent-filter>
         </activity>
 
-        <!-- MainActivity normal -->
+        <!-- HomeActivity: menú principal -->
+        <activity
+            android:name=".HomeActivity"
+            android:exported="false" />
+
+        <!-- MainActivity: pantalla de captura de datos -->
         <activity
             android:name=".MainActivity"
             android:exported="true" />
 
-        <!-- FileProvider -->
+        <!-- FileProvider: manejo de archivos -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
