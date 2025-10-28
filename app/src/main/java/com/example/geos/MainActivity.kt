@@ -63,9 +63,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         tvRutaFoto = binding.root.findViewById(R.id.tvRutaFoto)
         ivCheckFoto = binding.root.findViewById(R.id.ivCheckFoto)
-
 
         permisosLauncher.launch(
             arrayOf(
@@ -75,19 +75,16 @@ class MainActivity : AppCompatActivity() {
             )
         )
 
-        db = Room.databaseBuilder(
-            applicationContext,
-            UsuarioDataBase::class.java,
-            "usuarios_db"
-        ).build()
+
+        db = UsuarioDataBase.getDatabase(this)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Configura el resultado del intent de cámara
         takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
             if (success) {
-                tvRutaFoto.text = currentPhotoUri.path  // Mostrar ruta
-                ivCheckFoto.visibility = ImageView.VISIBLE // Mostrar palomita
+                tvRutaFoto.text = currentPhotoUri.path
+                ivCheckFoto.visibility = ImageView.VISIBLE
                 Toast.makeText(this, "Foto tomada correctamente", Toast.LENGTH_SHORT).show()
                 obtenerUbicacion()
             } else {
@@ -99,9 +96,10 @@ class MainActivity : AppCompatActivity() {
         binding.btnAgregar.setOnClickListener { agregarUsuario() }
         binding.btnEscribir.setOnClickListener {
             if (listaRegistros.isNotEmpty()) exportarExcel(listaRegistros)
-            else Toast.makeText(this, "No hay registros para exportar", Toast.LENGTH_SHORT).show() }
-        binding.btnRegresar.setOnClickListener { finish()}
+            else Toast.makeText(this, "No hay registros para exportar", Toast.LENGTH_SHORT).show()
+        }
     }
+
 
     /**
      * Inicia la cámara del dispositivo y crea un archivo temporal

@@ -29,19 +29,14 @@
         <activity
             android:name=".SplashActivity"
             android:exported="true"
-            android:noHistory="true"
             android:label="@string/title_activity_splash"
+            android:noHistory="true"
             android:theme="@style/Theme.GEOS">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- HomeActivity: menú principal -->
-        <activity
-            android:name=".HomeActivity"
-            android:exported="false" />
 
         <!-- MainActivity: pantalla de captura de datos -->
         <activity
@@ -60,5 +55,4 @@
         </provider>
 
     </application>
-
 </manifest>
