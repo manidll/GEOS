@@ -11,10 +11,13 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        // Espera 2.5 segundos y luego pasa a HomeActivity
+        // Tiempo de espera del splash (ejemplo: 2 segundos)
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, MainActivity::class.java))
+            // Abrir MenuActivity
+            startActivity(Intent(this, MenuActivity::class.java))
+            // Cerrar SplashActivity para que no se regrese al presionar "atrás"
             finish()
-        }, 2500)
+        }, 2000) // 2000 ms = 2 segundos
     }
 }
+

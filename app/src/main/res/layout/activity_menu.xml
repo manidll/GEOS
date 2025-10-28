@@ -1,0 +1,79 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp"
+    android:background="@android:color/white">
+
+    <!-- Encabezado: Título -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="16dp">
+
+        <ImageView
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:src="@drawable/logo_padronapp"
+            android:contentDescription="Logo"
+            android:layout_marginEnd="8dp"
+            >
+
+        </ImageView>
+
+    </LinearLayout>
+
+
+    <!-- Encabezado: Título -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bienvenido a PadrónApp"
+            android:textSize="20sp"
+            android:textColor="#24B6A4"
+            android:textStyle="bold"
+            />
+    </LinearLayout>
+
+
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnRegistro"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Registrar Usuario"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#24B6A4"
+        android:layout_marginBottom="16dp"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnHistorial"
+        android:text="Historial"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#24B6A4"
+        android:layout_marginBottom="16dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnConfiguracion"
+        android:text="Configuración"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#24B6A4"
+        android:layout_marginBottom="16dp"/>
+
+</LinearLayout>

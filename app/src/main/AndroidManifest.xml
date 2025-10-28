@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <!-- Permisos -->
     <uses-feature
         android:name="android.hardware.camera"
@@ -24,8 +23,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GEOS">
-
-        <!-- SplashActivity: pantalla inicial (launcher) -->
+        <activity
+            android:name=".ConfiguracionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HistorialActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MenuActivity"
+            android:exported="false" /> <!-- SplashActivity: pantalla inicial (launcher) -->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
@@ -34,16 +40,13 @@
             android:theme="@style/Theme.GEOS">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- MainActivity: pantalla de captura de datos -->
+        </activity> <!-- MainActivity: pantalla de captura de datos -->
         <activity
             android:name=".MainActivity"
-            android:exported="true" />
-
-        <!-- FileProvider: manejo de archivos -->
+            android:exported="true" /> <!-- FileProvider: manejo de archivos -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -53,6 +56,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
     </application>
+
 </manifest>
