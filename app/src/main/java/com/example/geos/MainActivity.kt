@@ -15,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.room.Room
 import com.example.geos.databinding.ActivityMainBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -79,6 +78,11 @@ class MainActivity : AppCompatActivity() {
         db = UsuarioDataBase.getDatabase(this)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        // 🔹 Lógica del botón de volver
+        binding.btnBackContainer.setOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
 
         // Configura el resultado del intent de cámara
         takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
@@ -218,8 +222,6 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "Usuario agregado correctamente", Toast.LENGTH_SHORT).show()
     }
 
-
-
     /**
      * Limpia todos los campos del formulario después de agregar un registro
      * y reinicia los valores de foto y ubicación.
@@ -278,68 +280,99 @@ class MainActivity : AppCompatActivity() {
      * @param listaUsuarios lista con los registros a exportar.
      */
     private fun exportarExcel(listaUsuarios: MutableList<Usuario>) {
-        val workbook = XSSFWorkbook()
-        val sheet = workbook.createSheet("Usuarios")
-
-        // Crear encabezados
-        val headerRow = sheet.createRow(0)
-        val headers = listOf(
-            "Inmueble", "Nombre", "Localización", "Giro", "Servicio", "Situación",
-            "Código Postal", "Sección", "Ruta", "Derivada", "Ubicación Toma",
-            "Num Serie Medidor", "Num Medidor", "Modelo Medidor", "Régimen Fiscal",
-            "Latitud", "Longitud", "Foto"
-        )
-        headers.forEachIndexed { i, h -> headerRow.createCell(i).setCellValue(h) }
-
-        // Llenar filas con datos
-        listaUsuarios.forEachIndexed { index, usuario ->
-            val row = sheet.createRow(index + 1)
-            row.createCell(0).setCellValue(usuario.inmueble.uppercase())
-            row.createCell(1).setCellValue(usuario.nombreUsuario.uppercase())
-            row.createCell(2).setCellValue(usuario.localizacion.uppercase())
-            row.createCell(3).setCellValue(usuario.giroD.uppercase())
-            row.createCell(4).setCellValue(usuario.servicioD.uppercase())
-            row.createCell(5).setCellValue(usuario.situacionD.uppercase())
-            row.createCell(6).setCellValue(usuario.codigoPostal.uppercase())
-            row.createCell(7).setCellValue(usuario.seccion.uppercase())
-            row.createCell(8).setCellValue(usuario.rutaD.uppercase())
-            row.createCell(9).setCellValue(usuario.derivada.uppercase())
-            row.createCell(10).setCellValue(usuario.ubicacionToma.uppercase())
-            row.createCell(11).setCellValue(usuario.numSerieMedidor.uppercase())
-            row.createCell(12).setCellValue(usuario.numMedidorC.uppercase())
-            row.createCell(13).setCellValue(usuario.modeloDmedidor.uppercase())
-            row.createCell(14).setCellValue(usuario.regimenFis.uppercase())
-            row.createCell(15).setCellValue(usuario.latitud ?: 0.0)
-            row.createCell(16).setCellValue(usuario.longitud ?: 0.0)
-
-            // Insertar imagen si existe
-            try {
-                val fotoFile = File(Uri.parse(usuario.fotoUri).path!!)
-                if (fotoFile.exists()) {
-                    val bytes = fotoFile.readBytes()
-                    val pictureIdx = workbook.addPicture(bytes, XSSFWorkbook.PICTURE_TYPE_JPEG)
-                    val drawing = sheet.createDrawingPatriarch()
-                    val anchor = XSSFClientAnchor(0, 0, 1023, 255, 17, index + 1, 18, index + 2)
-                    anchor.anchorType = ClientAnchor.AnchorType.MOVE_AND_RESIZE
-                    drawing.createPicture(anchor, pictureIdx).resize(1.0)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+        // 1️⃣ Pedir permisos si es necesario (solo Android 12 o menor)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                100
+            )
+            Toast.makeText(this, "Vuelve a presionar Exportar tras conceder permisos", Toast.LENGTH_SHORT).show()
+            return
         }
 
-        // Guardar archivo en Descargas
-        val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        val file = File(path, "padron_2025.xlsx")
-        try {
-            val out = FileOutputStream(file)
-            workbook.write(out)
-            out.close()
-            workbook.close()
-            Toast.makeText(this, "Archivo exportado: ${file.absolutePath}", Toast.LENGTH_LONG).show()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Error al exportar", Toast.LENGTH_SHORT).show()
+        // 2️⃣ Ejecutar el proceso en una corrutina
+        lifecycleScope.launch {
+            try {
+                // Obtener instancia de la base de datos
+                val db = UsuarioDataBase.getDatabase(this@MainActivity)
+                val listaUsuarios = db.usuarioDao().obtenerUsuarios()
+
+                if (listaUsuarios.isEmpty()) {
+                    Toast.makeText(this@MainActivity, "No hay usuarios para exportar", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                // Crear libro de Excel
+                val workbook = XSSFWorkbook()
+                val sheet = workbook.createSheet("Usuarios")
+
+                // Encabezados
+                val headerRow = sheet.createRow(0)
+                val headers = listOf(
+                    "Inmueble", "Nombre", "Localización", "Giro", "Servicio", "Situación",
+                    "Código Postal", "Sección", "Ruta", "Derivada", "Ubicación Toma",
+                    "Num Serie Medidor", "Num Medidor", "Modelo Medidor", "Régimen Fiscal",
+                    "Latitud", "Longitud", "Foto"
+                )
+                headers.forEachIndexed { i, h -> headerRow.createCell(i).setCellValue(h) }
+
+                // Filas con datos
+                listaUsuarios.forEachIndexed { index, usuario ->
+                    val row = sheet.createRow(index + 1)
+                    row.createCell(0).setCellValue(usuario.inmueble.uppercase())
+                    row.createCell(1).setCellValue(usuario.nombreUsuario.uppercase())
+                    row.createCell(2).setCellValue(usuario.localizacion.uppercase())
+                    row.createCell(3).setCellValue(usuario.giroD.uppercase())
+                    row.createCell(4).setCellValue(usuario.servicioD.uppercase())
+                    row.createCell(5).setCellValue(usuario.situacionD.uppercase())
+                    row.createCell(6).setCellValue(usuario.codigoPostal.uppercase())
+                    row.createCell(7).setCellValue(usuario.seccion.uppercase())
+                    row.createCell(8).setCellValue(usuario.rutaD.uppercase())
+                    row.createCell(9).setCellValue(usuario.derivada.uppercase())
+                    row.createCell(10).setCellValue(usuario.ubicacionToma.uppercase())
+                    row.createCell(11).setCellValue(usuario.numSerieMedidor.uppercase())
+                    row.createCell(12).setCellValue(usuario.numMedidorC.uppercase())
+                    row.createCell(13).setCellValue(usuario.modeloDmedidor.uppercase())
+                    row.createCell(14).setCellValue(usuario.regimenFis.uppercase())
+                    row.createCell(15).setCellValue(usuario.latitud ?: 0.0)
+                    row.createCell(16).setCellValue(usuario.longitud ?: 0.0)
+
+                    // Imagen
+                    try {
+                        val fotoFile = File(Uri.parse(usuario.fotoUri).path!!)
+                        if (fotoFile.exists()) {
+                            val bytes = fotoFile.readBytes()
+                            val pictureIdx = workbook.addPicture(bytes, XSSFWorkbook.PICTURE_TYPE_JPEG)
+                            val drawing = sheet.createDrawingPatriarch()
+                            val anchor = XSSFClientAnchor(0, 0, 1023, 255, 17, index + 1, 18, index + 2)
+                            anchor.anchorType = ClientAnchor.AnchorType.MOVE_AND_RESIZE
+                            drawing.createPicture(anchor, pictureIdx).resize(1.0)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+
+                // Guardar archivo
+                val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                val file = File(path, "padron_2025.xlsx")
+
+                val out = FileOutputStream(file)
+                workbook.write(out)
+                out.close()
+                workbook.close()
+
+                Toast.makeText(this@MainActivity, "Archivo exportado: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(this@MainActivity, "Error al exportar", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

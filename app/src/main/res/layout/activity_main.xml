@@ -497,5 +497,35 @@
                 android:textColor="#FFFFFF"
                 app:cornerRadius="8dp"/>
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/btnBackContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="4dp">
+
+
+        <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/flecha_izquierda"
+                android:contentDescription="Volver"
+                app:tint="#615F5F" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Volver"
+                android:textSize="13sp"
+                android:textColor="#615F5F"
+                android:textStyle="bold"
+                android:layout_marginStart="5dp" />
+        </LinearLayout>
+
+
     </LinearLayout>
 </ScrollView>

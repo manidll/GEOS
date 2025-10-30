@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Tema base de la app -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Colores generales -->
+        <item name="colorPrimary">#24B6A4</item>
+        <item name="colorPrimaryDark">#1B8C81</item>
+        <item name="colorAccent">#24B6A4</item>
+    </style>
+
+    <!-- Tema base para overlays (opcional para SearchView) -->
+    <style name="ThemeOverlay.App.SearchView" parent="ThemeOverlay.AppCompat.Light">
+        <!-- Color del texto que escribe el usuario -->
+        <item name="android:textColor">#24B6A4</item>
+        <!-- Color del hint -->
+        <item name="android:textColorHint">#777777</item>
+        <!-- Color de los íconos (lupa y cerrar) -->
+        <item name="android:tint">#24B6A4</item>
+    </style>
+
+    <!-- Estilo específico para el SearchView -->
+    <style name="CustomSearchViewTheme" parent="ThemeOverlay.App.SearchView">
+        <!-- Padding opcional -->
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+    </style>
+
+</resources>

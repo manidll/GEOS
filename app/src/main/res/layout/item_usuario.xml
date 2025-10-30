@@ -11,15 +11,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp">
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:background="#24B6A4">
 
+        <!-- Foto del usuario -->
         <ImageView
             android:id="@+id/ivFoto"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/camera_logo" />
+            android:src="@drawable/camera_logo"
+            />
 
+        <!-- Información del usuario -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -32,6 +37,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Nombre"
+                android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:textSize="16sp" />
 
@@ -40,6 +46,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Inmueble"
+                android:textColor="#FFFFFF"
                 android:textSize="14sp" />
 
             <TextView
@@ -47,7 +54,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Ubicación"
+                android:textColor="#FFFFFF"
                 android:textSize="12sp" />
         </LinearLayout>
+
+        <!-- Botón eliminar -->
+        <ImageView
+            android:id="@+id/btnEliminar"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/borrar"
+            android:contentDescription="Eliminar usuario"
+            android:padding="4dp"
+            card_view:tint="@color/white" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>
