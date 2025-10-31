@@ -1,10 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ConfiguracionActivity">
+    android:fillViewport="true"
+    android:fitsSystemWindows="true"
+    android:background="@android:color/white">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Contenedor principal con márgenes -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:divider="?android:attr/listDivider"
+        android:showDividers="middle">
+
+        <!-- 🔙 Botón de volver -->
+        <LinearLayout
+            android:id="@+id/btnBackConfiguracion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="6dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/flecha_izquierda"
+                android:contentDescription="Volver"
+                app:tint="#615F5F" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Volver"
+                android:textSize="13sp"
+                android:textColor="#615F5F"
+                android:textStyle="bold"
+                android:layout_marginStart="5dp" />
+        </LinearLayout>
+
+        <!-- 2. Exportación -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Exportación"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:layout_marginTop="16dp" />
+
+        <Button
+            android:id="@+id/btnElegirCarpeta"
+            android:text="Elegir carpeta de exportación"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#24B6A4"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp" />
+
+        <!-- 3. Privacidad y permisos -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Privacidad y permisos"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:layout_marginTop="16dp" />
+
+        <Button
+            android:id="@+id/btnPolitica"
+            android:text="Política de Privacidad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#24B6A4"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btnPermisosApp"
+            android:text="Gestionar permisos de la app"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#24B6A4"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp" />
+
+        <!-- 4. Información -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Información"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:id="@+id/txtVersion"
+            android:text="Versión: 1.0.0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" />
+
+        <Button
+            android:id="@+id/btnAcercaDe"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Acerca de"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#24B6A4"
+            android:layout_marginTop="12dp"
+            android:padding="10dp" />
+
+        <Button
+            android:id="@+id/btnContacto"
+            android:text="Enviar sugerencias o contacto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#24B6A4"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="8dp" />
+    </LinearLayout>
+</ScrollView>
