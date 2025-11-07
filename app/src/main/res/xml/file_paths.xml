@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<paths>
-    <!-- Carpeta privada de tu app: /storage/emulated/0/Android/data/tu.app/files/Pictures -->
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Permite compartir archivos en Pictures y Downloads -->
     <external-files-path
-        name="images"
+        name="my_images"
         path="Pictures/" />
+    <external-path
+        name="download_files"
+        path="Download/" />
 </paths>

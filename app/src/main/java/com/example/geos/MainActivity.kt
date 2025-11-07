@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvRutaFoto: TextView
     private lateinit var ivCheckFoto: ImageView
 
-    // Lanzador de permisos para cámara y ubicación
     private val permisosLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permisos ->
@@ -53,11 +52,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Función principal que se ejecuta al iniciar la Activity.
-     * Configura permisos, base de datos, cámara, cliente de ubicación
-     * y listeners de botones.
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -74,17 +68,13 @@ class MainActivity : AppCompatActivity() {
             )
         )
 
-
         db = UsuarioDataBase.getDatabase(this)
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        // 🔹 Lógica del botón de volver
         binding.btnBackContainer.setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        // Configura el resultado del intent de cámara
         takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
             if (success) {
                 tvRutaFoto.text = currentPhotoUri.path
@@ -98,46 +88,32 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnFoto.setOnClickListener { tomarFoto() }
         binding.btnAgregar.setOnClickListener { agregarUsuario() }
-        binding.btnEscribir.setOnClickListener {
-            if (listaRegistros.isNotEmpty()) exportarExcel(listaRegistros)
-            else Toast.makeText(this, "No hay registros para exportar", Toast.LENGTH_SHORT).show()
+
+        // 🔹 Exportar Excel
+        binding.btnExportar.setOnClickListener {
+            exportarExcel()
+        }
+
+
+        // 🔹 Abrir Excel actualizado
+        binding.btnAbrirExcel.setOnClickListener {
+            abrirExcel()
         }
     }
 
-
-    /**
-     * Inicia la cámara del dispositivo y crea un archivo temporal
-     * donde se almacenará la imagen capturada.
-     */
     private fun tomarFoto() {
         val photoFile = File(
             getExternalFilesDir(Environment.DIRECTORY_PICTURES),
             "foto_${System.currentTimeMillis()}.jpg"
         )
         currentPhotoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", photoFile)
-        grantUriPermission(
-            "com.android.camera",
-            currentPhotoUri,
-            Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
-        )
         takePictureLauncher.launch(currentPhotoUri)
     }
 
-/**
- * Valida que los campos de texto proporcionados no estén vacíos.
- *
- * Recorre cada [EditText] recibido como argumento y verifica si su contenido
- * es nulo o está vacío (después de aplicar trim). Si un campo está vacío,
- * se le asigna un mensaje de error "Campo Obligatorio" y la función marcará
- * la validación como fallida.
- *
- * @param campos Lista variable de campos [EditText] a validar.
- * @return `true` si todos los campos contienen texto, `false` si al menos uno está vacío.
- */
     private fun validarCampos(vararg campos: EditText): Boolean {
         var valido = true
-        for (campo in campos){
-            if (campo.text.toString().trim().isEmpty()){
+        for (campo in campos) {
+            if (campo.text.toString().trim().isEmpty()) {
                 campo.error = "Campo Obligatorio"
                 valido = false
             }
@@ -145,12 +121,6 @@ class MainActivity : AppCompatActivity() {
         return valido
     }
 
-    /**
-     * Lee los datos ingresados por el usuario en los campos de texto,
-     * valida que haya información suficiente, foto y ubicación;
-     * luego crea un objeto [Usuario], lo guarda en la lista local
-     * y en la base de datos Room.
-     */
     private fun agregarUsuario() {
         val inmueble = binding.etInmueble.text.toString().trim()
         val nombre = binding.etNombreUsuario.text.toString().trim()
@@ -168,29 +138,28 @@ class MainActivity : AppCompatActivity() {
         val modeloDmedidor = binding.etModeloMedidor.text.toString().trim()
         val regimenFis = binding.etRegimenFiscal.text.toString().trim()
 
-        // 🔹 Validar campos obligatorios
-        val validos = validarCampos(binding.etInmueble, binding.etNombreUsuario, binding.etLocalizacion,
-                                                binding.etGiroD, binding.etServicioD, binding.etSituacionD, binding.etCodigoPostal, binding.etSeccion,
-                                                    binding.etRutaD, binding.etDerivada, binding.etUbicacionToma, binding.etNumSerieMedidor, binding.etNumMedidor,
-                                                        binding.etModeloMedidor, binding.etRegimenFiscal)
+        val validos = validarCampos(
+            binding.etInmueble, binding.etNombreUsuario, binding.etLocalizacion,
+            binding.etGiroD, binding.etServicioD, binding.etSituacionD, binding.etCodigoPostal,
+            binding.etSeccion, binding.etRutaD, binding.etDerivada, binding.etUbicacionToma,
+            binding.etNumSerieMedidor, binding.etNumMedidor, binding.etModeloMedidor, binding.etRegimenFiscal
+        )
+
         if (!validos) {
             Toast.makeText(this, "Completa los campos obligatorios", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // 🔹 Validar foto
         if (!::currentPhotoUri.isInitialized || currentPhotoUri == Uri.EMPTY) {
             Toast.makeText(this, "Debes tomar una foto antes de agregar", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // 🔹 Validar ubicación
         if (currentLat == null || currentLng == null) {
             Toast.makeText(this, "No se pudo obtener ubicación", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // 🔹 Crear y guardar usuario
         val usuario = Usuario(
             inmueble = inmueble,
             nombreUsuario = nombre,
@@ -222,10 +191,6 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "Usuario agregado correctamente", Toast.LENGTH_SHORT).show()
     }
 
-    /**
-     * Limpia todos los campos del formulario después de agregar un registro
-     * y reinicia los valores de foto y ubicación.
-     */
     private fun limpiarCampos() {
         binding.apply {
             etInmueble.text?.clear()
@@ -253,12 +218,6 @@ class MainActivity : AppCompatActivity() {
         currentLng = null
     }
 
-
-    /**
-     * Obtiene la ubicación actual del dispositivo usando el cliente
-     * de ubicación de Google ([FusedLocationProviderClient]).
-     * Asigna los valores de latitud y longitud a variables globales.
-     */
     private fun obtenerUbicacion() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -272,33 +231,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Exporta la lista de usuarios a un archivo Excel (.xlsx) usando Apache POI.
-     * Crea una hoja con encabezados, escribe los datos y agrega las imágenes
-     * correspondientes a cada registro.
-     *
-     * @param listaUsuarios lista con los registros a exportar.
-     */
-    private fun exportarExcel(listaUsuarios: MutableList<Usuario>) {
-        // 1️⃣ Pedir permisos si es necesario (solo Android 12 o menor)
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                100
-            )
-            Toast.makeText(this, "Vuelve a presionar Exportar tras conceder permisos", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // 2️⃣ Ejecutar el proceso en una corrutina
+    private fun exportarExcel() {
         lifecycleScope.launch {
             try {
-                // Obtener instancia de la base de datos
                 val db = UsuarioDataBase.getDatabase(this@MainActivity)
                 val listaUsuarios = db.usuarioDao().obtenerUsuarios()
 
@@ -307,11 +242,9 @@ class MainActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                // Crear libro de Excel
                 val workbook = XSSFWorkbook()
                 val sheet = workbook.createSheet("Usuarios")
 
-                // Encabezados
                 val headerRow = sheet.createRow(0)
                 val headers = listOf(
                     "Inmueble", "Nombre", "Localización", "Giro", "Servicio", "Situación",
@@ -321,47 +254,29 @@ class MainActivity : AppCompatActivity() {
                 )
                 headers.forEachIndexed { i, h -> headerRow.createCell(i).setCellValue(h) }
 
-                // Filas con datos
                 listaUsuarios.forEachIndexed { index, usuario ->
                     val row = sheet.createRow(index + 1)
-                    row.createCell(0).setCellValue(usuario.inmueble.uppercase())
-                    row.createCell(1).setCellValue(usuario.nombreUsuario.uppercase())
-                    row.createCell(2).setCellValue(usuario.localizacion.uppercase())
-                    row.createCell(3).setCellValue(usuario.giroD.uppercase())
-                    row.createCell(4).setCellValue(usuario.servicioD.uppercase())
-                    row.createCell(5).setCellValue(usuario.situacionD.uppercase())
-                    row.createCell(6).setCellValue(usuario.codigoPostal.uppercase())
-                    row.createCell(7).setCellValue(usuario.seccion.uppercase())
-                    row.createCell(8).setCellValue(usuario.rutaD.uppercase())
-                    row.createCell(9).setCellValue(usuario.derivada.uppercase())
-                    row.createCell(10).setCellValue(usuario.ubicacionToma.uppercase())
-                    row.createCell(11).setCellValue(usuario.numSerieMedidor.uppercase())
-                    row.createCell(12).setCellValue(usuario.numMedidorC.uppercase())
-                    row.createCell(13).setCellValue(usuario.modeloDmedidor.uppercase())
-                    row.createCell(14).setCellValue(usuario.regimenFis.uppercase())
+                    row.createCell(0).setCellValue(usuario.inmueble)
+                    row.createCell(1).setCellValue(usuario.nombreUsuario)
+                    row.createCell(2).setCellValue(usuario.localizacion)
+                    row.createCell(3).setCellValue(usuario.giroD)
+                    row.createCell(4).setCellValue(usuario.servicioD)
+                    row.createCell(5).setCellValue(usuario.situacionD)
+                    row.createCell(6).setCellValue(usuario.codigoPostal)
+                    row.createCell(7).setCellValue(usuario.seccion)
+                    row.createCell(8).setCellValue(usuario.rutaD)
+                    row.createCell(9).setCellValue(usuario.derivada)
+                    row.createCell(10).setCellValue(usuario.ubicacionToma)
+                    row.createCell(11).setCellValue(usuario.numSerieMedidor)
+                    row.createCell(12).setCellValue(usuario.numMedidorC)
+                    row.createCell(13).setCellValue(usuario.modeloDmedidor)
+                    row.createCell(14).setCellValue(usuario.regimenFis)
                     row.createCell(15).setCellValue(usuario.latitud ?: 0.0)
                     row.createCell(16).setCellValue(usuario.longitud ?: 0.0)
-
-                    // Imagen
-                    try {
-                        val fotoFile = File(Uri.parse(usuario.fotoUri).path!!)
-                        if (fotoFile.exists()) {
-                            val bytes = fotoFile.readBytes()
-                            val pictureIdx = workbook.addPicture(bytes, XSSFWorkbook.PICTURE_TYPE_JPEG)
-                            val drawing = sheet.createDrawingPatriarch()
-                            val anchor = XSSFClientAnchor(0, 0, 1023, 255, 17, index + 1, 18, index + 2)
-                            anchor.anchorType = ClientAnchor.AnchorType.MOVE_AND_RESIZE
-                            drawing.createPicture(anchor, pictureIdx).resize(1.0)
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
                 }
 
-                // Guardar archivo
                 val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 val file = File(path, "padron_2025.xlsx")
-
                 val out = FileOutputStream(file)
                 workbook.write(out)
                 out.close()
@@ -376,4 +291,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+    // 🔹 Abrir el Excel actualizado
+    private fun abrirExcel() {
+        try {
+            val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "padron_2025.xlsx")
+            if (!file.exists()) {
+                Toast.makeText(this, "Primero exporta el archivo Excel", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", file)
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.setDataAndType(uri, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
+
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "No se pudo abrir el archivo", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
+    }
 }

@@ -1,60 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:fillViewport="true"
-    android:orientation="vertical"
     android:background="#F5F5F5">
 
-    <!-- Encabezado -->
+    <!-- Contenedor principal -->
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#24B6A4"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:elevation="4dp">
+        android:divider="?android:attr/listDivider"
+        android:showDividers="middle">
 
-        <ImageView
-            android:id="@+id/btnBack"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/flecha_izquierda"
-            android:contentDescription="Volver"
-            android:clickable="true"
-            android:focusable="true" />
-
-        <TextView
+        <!-- Encabezado -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="Historial de Registros"
+            android:background="#24B6A4"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:elevation="4dp">
+
+            <ImageView
+                android:id="@+id/btnBack"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/flecha_izquierda"
+                android:contentDescription="Volver"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Historial de Registros"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Barra de búsqueda -->
+        <SearchView
+            android:id="@+id/searchView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:queryHint="Buscar"
+            android:iconifiedByDefault="false"
+            android:theme="@style/CustomSearchViewTheme" />
+
+        <!-- Contenedor del RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvHistorial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:padding="8dp"
+            android:clipToPadding="false"
+            android:scrollbars="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAbrirExcelHis"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="20dp"
+            android:text="Abrir Excel"
+            android:textSize="14sp"
+            android:textAllCaps="false"
+            android:backgroundTint="#24B6A4"
             android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            app:cornerRadius="20dp"
+            app:iconPadding="0dp"
+            android:paddingHorizontal="20dp" />
+
     </LinearLayout>
-
-    <SearchView
-        android:id="@+id/searchView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:queryHint="Buscar"
-        android:iconifiedByDefault="false"
-        android:theme="@style/CustomSearchViewTheme" />
-
-
-    <!-- Contenedor del RecyclerView -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvHistorial"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="8dp"
-        android:padding="8dp"
-        android:clipToPadding="false"
-        android:scrollbars="vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-</LinearLayout>
+</ScrollView>

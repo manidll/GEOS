@@ -1,17 +1,23 @@
 package com.example.geos
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.widget.ImageView
 import android.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import com.google.android.material.button.MaterialButton
 
 class HistorialActivity : AppCompatActivity() {
 
@@ -21,15 +27,6 @@ class HistorialActivity : AppCompatActivity() {
     private lateinit var listaUsuariosOriginal: List<Usuario>
     private lateinit var listaUsuarios: MutableList<Usuario>
 
-    /**
-     * Método principal de la actividad.
-     *
-     * Inicializa el layout, configura el RecyclerView y su adapter,
-     * carga los usuarios desde la base de datos, configura la búsqueda
-     * y el botón de retroceso.
-     *
-     * @param savedInstanceState Estado previo de la actividad, si existe.
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_historial)
@@ -39,11 +36,18 @@ class HistorialActivity : AppCompatActivity() {
         db = UsuarioDataBase.getDatabase(this)
 
         val searchView = findViewById<SearchView>(R.id.searchView)
-
         val btnBack = findViewById<ImageView>(R.id.btnBack)
+        val btnAbrir = findViewById<MaterialButton>(R.id.btnAbrirExcelHis)
+
+
         btnBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
-        // Cargar registros desde la base de datos en un hilo de fondo
+        // Botón para abrir el Excel
+        btnAbrir.setOnClickListener {
+            abrirExcel()
+        }
+
+        // Cargar registros desde la base de datos
         lifecycleScope.launch(Dispatchers.IO) {
             listaUsuariosOriginal = db.usuarioDao().obtenerUsuarios()
             listaUsuarios = listaUsuariosOriginal.toMutableList()
@@ -55,10 +59,9 @@ class HistorialActivity : AppCompatActivity() {
             }
         }
 
-        // Configuración de la búsqueda en tiempo real
+        // Búsqueda en tiempo real
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean = false
-
+            override fun onQueryTextSubmit(query: String?) = false
             override fun onQueryTextChange(newText: String?): Boolean {
                 val texto = newText ?: ""
                 val listaFiltrada = if (texto.isEmpty()) {
@@ -75,12 +78,47 @@ class HistorialActivity : AppCompatActivity() {
     }
 
     /**
-     * Elimina un usuario de la base de datos después de confirmar con el usuario.
-     *
-     * Muestra un diálogo de confirmación. Si el usuario confirma, elimina el usuario
-     * de la base de datos, actualiza la lista original y mutable, y refresca el RecyclerView.
-     *
-     * @param usuario Usuario que será eliminado.
+     * Abre el archivo Excel exportado si existe.
+     * Usa FileProvider para obtener una URI segura y lo abre con una app compatible (Excel, WPS, Sheets, etc.).
+     */
+    private fun abrirExcel() {
+        val file = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            "padron_2025.xlsx"
+        )
+
+        if (!file.exists()) {
+            Toast.makeText(this, "Primero exporta el archivo Excel.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        try {
+            val uri = FileProvider.getUriForFile(
+                this,
+                "${packageName}.fileprovider",
+                file
+            )
+
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.setDataAndType(
+                uri,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            startActivity(intent)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(
+                this,
+                "No se pudo abrir el archivo. Asegúrate de tener una app compatible.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    /**
+     * Elimina un usuario de la base de datos después de confirmación.
      */
     private fun eliminarUsuario(usuario: Usuario) {
         AlertDialog.Builder(this)
@@ -93,7 +131,11 @@ class HistorialActivity : AppCompatActivity() {
                         listaUsuariosOriginal = listaUsuariosOriginal.filter { it.id != usuario.id }
                         listaUsuarios.remove(usuario)
                         adapter.notifyDataSetChanged()
-                        Toast.makeText(this@HistorialActivity, "Registro eliminado", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@HistorialActivity,
+                            "Registro eliminado",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
